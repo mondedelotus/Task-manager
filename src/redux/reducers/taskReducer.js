@@ -5,11 +5,12 @@ const getInitialTask = () => {
     if (localTaskList) {
         return JSON.parse(localTaskList);
     }
-    window.localStorage.setItem("taskList", JSON.stringify([]));
+    window.localStorage.setItem("taskList", []);
     return [];
 };
 
 const initialValue = {
+    filterStatus: "all",
     taskList: getInitialTask(),
 };
 
@@ -32,7 +33,11 @@ export const taskSlice = createSlice({
             } else {
                 window.localStorage.setItem(
                     "taskList",
-                    JSON.stringify([{ ...action.payload }])
+                    JSON.stringify([
+                        {
+                            ...action.payload,
+                        },
+                    ])
                 );
             }
         },
@@ -69,8 +74,12 @@ export const taskSlice = createSlice({
                 state.taskList = taskListArr;
             }
         },
+        updateFilterStatus: (state, action) => {
+            state.filterStatus = action.payload;
+        },
     },
 });
 
-export const { addTask, updateTask, deleteTask } = taskSlice.actions;
+export const { addTask, updateTask, deleteTask, updateFilterStatus } =
+    taskSlice.actions;
 export default taskSlice.reducer;

@@ -1,19 +1,62 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useSelector } from "react-redux";
+import styles from "../styles/modules/app.module.scss";
 import TaskItem from "./TaskItem";
+
+const container = {
+    hidden: { opacity: 1 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+            staggerChildren: 0.2,
+        },
+    },
+};
+const child = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+    },
+};
 
 function AppContent() {
     const taskList = useSelector((state) => state.task.taskList);
-    const sortedTaskList = [...taskList].sort((a, b) => {
-        new Date(a.time) - new Date(b.time);
+    const filterStatus = useSelector((state) => state.task.filterStatus);
+
+    const sortedTaskList = [...taskList];
+    sortedTaskList.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    const filteredTaskList = sortedTaskList.filter((item) => {
+        if (filterStatus === "all") {
+            return true;
+        }
+        return item.status === filterStatus;
     });
+
     return (
-        <div>
-            {sortedTaskList && sortedTaskList.length > 0
-                ? sortedTaskList.map((task) => (
-                      <TaskItem key={task.id} task={task} />
-                  ))
-                : "No task added yet"}
-        </div>
+        <motion.div
+            className={styles.content__wrapper}
+            variants={container}
+            initial="hidden"
+            animate="visible"
+        >
+            <AnimatePresence>
+                {filteredTaskList && filteredTaskList.length > 0 ? (
+                    filteredTaskList.map((task) => (
+                        // <motion.div key={task.id} variants={child}>
+                        <TaskItem key={task.id} task={task} />
+                        // </motion.div>
+                    ))
+                ) : (
+                    <motion.p variants={child} className={styles.emptyText}>
+                        No Tasks
+                    </motion.p>
+                )}
+            </AnimatePresence>
+        </motion.div>
     );
 }
+
 export default AppContent;
